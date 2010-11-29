@@ -5784,3 +5784,7 @@ loop:   for (;;) {
     return itself;
 
 }());
+
+/*global exports:true */
+/*member exports.JSLINT */
+exports.JSLINT = JSLINT;
