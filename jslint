@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Follow symlinks to find the directory with the actual executable.
+[ "`readlink -f $0`" != "$0" ] && exec `readlink -f $0` "$@"
+
+nodejs "`dirname $0`/run-jslint.js" "$@"
