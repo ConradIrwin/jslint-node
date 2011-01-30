@@ -1,47 +1,48 @@
 /*vim: set filetype=javascript: */
-/*global require:false, process:false */
+/*global require:false, process:false, sys:false */
 
-(function (file) {
-    var e, i, input, len, success, pad,
-        sys = require("sys"),
-        fs = require("fs"),
-        JSLINT = require('./fulljslint.js').JSLINT;
+(function (files) {
 
-    if (!file) {
+    if (!files.length) {
         sys.puts("Usage: jslint file.js");
         process.exit(1);
     }
+    files.forEach(function (file) {
+        var input, success,
+            sys = require("sys"),
+            fs = require("fs"),
+            JSLINT = require('./fulljslint.js').JSLINT;
 
-    input = fs.readFileSync(file);
-    if (!input) {
-        sys.puts("jslint: Couldn't open file '" + file + "'.");
-        process.exit(1);
-    } else {
-        input = input.toString("utf8");
-    }
-
-    success = JSLINT(input,
-        {
-            bitwise:  true,
-            eqeqeq:   true,
-            immed:    true,
-            newcap:   true,
-            nomen:    true,
-            onevar:   true,
-            plusplus: true,
-            regexp:   true,
-            undef:    true,
-            white:    true
+        input = fs.readFileSync(file);
+        if (!input) {
+            sys.puts("jslint: Couldn't open file '" + file + "'.");
+            return;
+        } else {
+            input = input.toString("utf8");
         }
-    );
 
-    if (!success) {
-        sys.puts(JSLINT.errors.length);
-        JSLINT.errors.forEach(function (e) {
-            sys.puts(' ' + e.line + ',' + e.character + ': ' + e.reason);
-            sys.puts('    ' + (e.evidence || '').replace(/^\s+|\s+$/, ""));
-        });
-        process.exit(2);
-    }
+        success = JSLINT(input,
+            {
+                bitwise:  true,
+                eqeqeq:   true,
+                immed:    true,
+                newcap:   true,
+                nomen:    true,
+                onevar:   true,
+                plusplus: true,
+                regexp:   true,
+                undef:    true,
+                white:    true
+            }
+        );
 
-}(process.ARGV[2]));
+        if (!success) {
+            JSLINT.errors.forEach(function (e) {
+                if (e) {
+                    sys.puts(file + ':' + e.line + ':' + e.character + ': ' + e.reason);
+                    sys.puts('\t' + (e.evidence || '').replace(/^\s+|\s+$/, ""));
+                }
+            });
+        }
+    });
+}(process.argv.slice(2)));
