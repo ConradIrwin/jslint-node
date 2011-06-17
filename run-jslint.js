@@ -2,18 +2,29 @@
 /*global require:false, process:false, sys:false */
 
 (function (files) {
+    var sys = require('sys');
 
     if (!files.length) {
         sys.puts("Usage: jslint file.js");
         process.exit(1);
     }
+
     files.forEach(function (file) {
+        if (file === "--ignore-no-files") {
+            return;
+        }
         var input, success,
             sys = require("sys"),
             fs = require("fs"),
             JSLINT = require('./fulljslint.js').JSLINT;
 
-        input = fs.readFileSync(file);
+        try {
+            input = fs.readFileSync(file);
+        } catch (e) {
+            sys.puts(e);
+            return;
+        }
+
         if (!input) {
             sys.puts("jslint: Couldn't open file '" + file + "'.");
             return;
@@ -43,6 +54,7 @@
                     sys.puts('\t' + (e.evidence || '').replace(/^\s+|\s+$/, ""));
                 }
             });
+            process.exit(2);
         }
     });
 }(process.argv.slice(2)));
