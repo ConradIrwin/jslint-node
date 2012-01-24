@@ -1,8 +1,34 @@
 /*vim: set filetype=javascript: */
-/*global require:false, process:false, sys:false */
+/*global require:false, process:false */
+
+var sys = require('sys'),
+     fs = require('fs'),
+   path = require('path');
+
+function loadDotJslints(file) {
+    var dir = fs.realpathSync(file),
+        value = "";
+
+    do {
+
+        dir = path.dirname(dir);
+        try {
+            value += fs.readFileSync(dir + "/.jslint") + "\n";
+        } catch (e) { }
+
+    } while (dir !== '/');
+
+    return value;
+}
 
 (function (files) {
-    var sys = require('sys');
+
+    var context = true;
+
+    if (files[0] === '--no-context') {
+        context = false;
+        files.shift();
+    }
 
     if (!files.length) {
         sys.puts("Usage: jslint file.js");
@@ -13,9 +39,7 @@
         if (file === "--ignore-no-files") {
             return;
         }
-        var input, success,
-            sys = require("sys"),
-            fs = require("fs"),
+        var input, success, dotjslint, dotjslintlength,
             JSLINT = require('./fulljslint.js').JSLINT;
 
         try {
@@ -25,11 +49,14 @@
             return;
         }
 
+        dotjslint = loadDotJslints(file);
+        dotjslintlength = dotjslint.split("\n").length;
+
         if (!input) {
             sys.puts("jslint: Couldn't open file '" + file + "'.");
             return;
         } else {
-            input = input.toString("utf8");
+            input = dotjslint.toString("utf-8") + input.toString("utf8");
         }
 
         success = JSLINT(input,
@@ -50,11 +77,14 @@
         if (!success) {
             JSLINT.errors.forEach(function (e) {
                 if (e) {
-                    sys.puts(file + ':' + e.line + ':' + e.character + ': ' + e.reason);
-                    sys.puts('\t' + (e.evidence || '').replace(/^\s+|\s+$/, ""));
+                    sys.puts(file + ':' + (e.line - dotjslintlength + 1) + ' character ' + e.character + ': ' + e.reason);
+                    if (context) {
+                        sys.puts('\t' + (e.evidence || '').replace(/^\s+|\s+$/, ""));
+                    }
                 }
             });
             process.exit(2);
         }
     });
 }(process.argv.slice(2)));
+
