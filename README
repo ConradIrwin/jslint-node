@@ -1,3 +1,23 @@
+A wrapped version of jslint.
+
+You will need to have node-js installed and available in your $PATH as "node"
+
+To install this, download it anywhere and then add a symlink from your $PATH to the jslint
+in this directory.
+
+    e.g.
+
+    cd ~/src
+    git clone https://github.com/ConradIrwin/jslint-node.git
+    cd ~/bin
+    ln ~/src/jslint-node/jslint
+
+Let me know via conrad.irwin@gmail.com if you need more help.
+
+
+Original README for jslint:
+---------------------------
+
 JSLint, The JavaScript Code Quality Tool
 
 Douglas Crockford
